@@ -1,0 +1,21 @@
+/bin/
+/web/node_modules/
+/web/dist/
+
+# Embedded dist that the Go binary serves — produced at build time from web/dist
+/internal/http/dist/
+
+# Local env
+.env
+.env.local
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Go
+*.test
+*.out
+coverage.html

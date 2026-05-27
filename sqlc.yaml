@@ -1,0 +1,16 @@
+version: "2"
+sql:
+  - engine: postgresql
+    queries: db/queries
+    # Glob only *.up.sql so sqlc never tries to parse the DROP statements
+    # in our *.down.sql files when inferring the schema.
+    schema: "db/migrations/*.up.sql"
+    gen:
+      go:
+        package: sqlc
+        out: internal/repository/sqlc
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_interface: false
+        emit_json_tags: false
+        emit_empty_slices: true
