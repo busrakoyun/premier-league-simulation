@@ -9,6 +9,16 @@ type MatchResult struct {
 	PlayedAt  time.Time
 }
 
+// MatchScore is the goal count for a single match — the value the simulator
+// produces before the service stamps a played-at timestamp on it. Kept
+// distinct from MatchResult so the simulator stays stateless w.r.t. clocks
+// (the small duplication of two int fields is the price; not worth embedding
+// MatchScore inside MatchResult given how often each is constructed by hand).
+type MatchScore struct {
+	HomeGoals int
+	AwayGoals int
+}
+
 // Match is a fixture between two teams in a given week of a season.
 //
 // Composition: embedding *MatchResult lets a played match expose HomeGoals
