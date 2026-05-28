@@ -1,4 +1,4 @@
-.PHONY: help build run test sqlc migrate-up migrate-down db-up db-down clean tools
+.PHONY: help build run test sqlc migrate-up migrate-down db-up db-down clean tools web-install web-dev web-build web-typecheck
 
 DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/premier_league?sslmode=disable
 MIGRATE      := migrate -path db/migrations -database "$(DATABASE_URL)"
@@ -36,5 +36,19 @@ db-up: ## Start a local Postgres in Docker
 db-down: ## Stop and remove the local Postgres container
 	docker stop pl-postgres && docker rm pl-postgres
 
+web-install: ## Install Vue / Vite dependencies
+	cd web && npm install
+
+web-dev: ## Run the Vite dev server (proxies /api to :8080)
+	cd web && npm run dev
+
+web-build: ## Build the Vue dist and copy it into the Go embed directory
+	cd web && npm run build
+	rm -rf internal/http/dist/assets
+	cp -r web/dist/* internal/http/dist/
+
+web-typecheck: ## Run vue-tsc against the SPA
+	cd web && npm run typecheck
+
 clean: ## Remove build artifacts
-	rm -rf bin/
+	rm -rf bin/ web/dist/

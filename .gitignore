@@ -2,10 +2,12 @@
 /web/node_modules/
 /web/dist/
 
-# Embedded dist for go:embed. Only the placeholder index.html is tracked;
-# Vue assets are copied in at build time and stay ignored.
+# Embedded dist for go:embed. Only .gitkeep is tracked so the directory
+# exists on a fresh clone; the SPA handler falls back to an in-code
+# placeholder when no real index.html is embedded. `make web-build` copies
+# the Vue dist in at build time (stays gitignored).
 /internal/http/dist/*
-!/internal/http/dist/index.html
+!/internal/http/dist/.gitkeep
 
 # Local env
 .env
