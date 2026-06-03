@@ -1,3 +1,6 @@
+-include .env
+export
+
 .PHONY: help build run test sqlc migrate-up migrate-down db-up db-down clean tools web-install web-dev web-build web-typecheck
 
 DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/premier_league?sslmode=disable
