@@ -1,0 +1,23 @@
+# VCS
+.git
+.gitignore
+
+# Rebuilt inside the image — never copy host artifacts in.
+**/node_modules
+web/dist
+bin
+
+# go:embed target is repopulated from the web build stage.
+internal/http/dist
+
+# Local env / editor / OS cruft
+.env
+.env.local
+.idea
+.vscode
+.DS_Store
+*.swp
+
+# Not needed in the image
+*.md
+.github
