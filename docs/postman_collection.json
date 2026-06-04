@@ -1,0 +1,197 @@
+{
+  "info": {
+    "name": "Premier League Simulation API",
+    "description": "REST API for the Premier League match simulator.\n\nThe base URL is the `{{base_url}}` collection variable, defaulting to `http://localhost:8080`. To hit the live deployment, edit the variable to `https://pl-sim.onrender.com` (note: the free Render tier sleeps after inactivity, so the first request may take ~50s while the instance wakes).\n\nTypical flow: GET current season -> POST next-week (or play-all) -> GET standings -> GET predictions (available once 4 weeks are played) -> PATCH a match score -> POST reset.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Healthz",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/healthz",
+              "host": ["{{base_url}}"],
+              "path": ["healthz"]
+            },
+            "description": "Liveness probe used by Render. Returns 200 with `{\"status\":\"ok\"}`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Season (read)",
+      "item": [
+        {
+          "name": "Get current season",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current"]
+            },
+            "description": "Returns the active season (id, name, current_week, total_weeks, created_at). 404 `NO_CURRENT_SEASON` if none exists."
+          },
+          "response": []
+        },
+        {
+          "name": "Get teams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current/teams",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current", "teams"]
+            },
+            "description": "Returns `{\"teams\":[...]}` including each team's attack_strength, defense_strength, and home_advantage (the parameters that drive the simulator)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get standings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current/standings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current", "standings"]
+            },
+            "description": "Returns `{\"rows\":[...]}` — the league table computed on read from the played matches. Sorted by points, then goal difference, then goals for, then name."
+          },
+          "response": []
+        },
+        {
+          "name": "Get matches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current/matches",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current", "matches"]
+            },
+            "description": "Returns `{\"matches\":[...]}` — every fixture in the season. Unplayed matches have `played:false` and omit the `score` object."
+          },
+          "response": []
+        },
+        {
+          "name": "Get predictions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current/predictions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current", "predictions"]
+            },
+            "description": "Returns `{\"rows\":[...]}` — each team's Monte Carlo championship probability (rates sum to 1). Returns 422 `PREDICTIONS_NOT_YET_AVAILABLE` until at least 4 weeks have been played."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Simulation (write)",
+      "item": [
+        {
+          "name": "Play next week",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current/next-week",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current", "next-week"]
+            },
+            "description": "Simulates every unplayed fixture in the next week and advances the season pointer. No request body. Returns `{\"week\":N,\"matches\":[...]}`. Returns 422 `SEASON_COMPLETE` once all weeks are played."
+          },
+          "response": []
+        },
+        {
+          "name": "Play all remaining weeks",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current/play-all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current", "play-all"]
+            },
+            "description": "Simulates from the current week to the end of the season. No request body. Returns `{\"weeks\":[{\"week\":N,\"matches\":[...]}]}`. Returns 422 `SEASON_COMPLETE` if nothing remains."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset season",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seasons/current/reset",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seasons", "current", "reset"]
+            },
+            "description": "Wipes results, resets the week counter to 0, and regenerates fixtures. No request body. Returns 204 No Content."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Matches",
+      "item": [
+        {
+          "name": "Edit match score",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"home_goals\": 2,\n  \"away_goals\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/matches/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "matches", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID of an already-played match to edit"
+                }
+              ]
+            },
+            "description": "Overrides the score of a played match. Standings and predictions recompute on the next read. Errors: 400 `VALIDATION` (bad id or body), 400 `INVALID_SCORE` (negative goals), 404 `NOT_FOUND` (no such match), 422 `MATCH_NOT_PLAYED` (match hasn't been played yet)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
